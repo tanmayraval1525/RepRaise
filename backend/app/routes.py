@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify, Blueprint,current_app
-#from flask_bcrypt import Bcrypt
+from psycopg2 import sql,Error
 from flask_jwt_extended import  create_access_token, jwt_required, get_jwt_identity
 from app.db import get_db_connection,release_db_connection
-from sqlalchemy.exc import SQLAlchemyError
+#from sqlalchemy.exc import SQLAlchemyError
 from app import bcrypt,jwt
+
 
 main = Blueprint('main', __name__)
 
@@ -19,8 +20,8 @@ def signup():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    fname = data.get('fname')
-    lname = data.get('lname')
+    fname = data.get('firstName')
+    lname = data.get('lastName')
 
     if not fname or not email or not password:
         return jsonify({'error': 'All fields are required'}), 400
@@ -30,8 +31,8 @@ def signup():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        insert_query = f"CALL user_signup('{fname}', '{lname}', '{email}', '{hashed_password}', NULL);"
-        cursor.execute(insert_query)
+        insert_query = sql.SQL("CALL user_signup(%s, %s, %s, %s, NULL);")
+        cursor.execute(insert_query, (fname, lname, email, hashed_password))
         user_id = cursor.fetchone()[0]
         conn.commit()
         release_db_connection(conn)
@@ -40,7 +41,7 @@ def signup():
         else:
             return jsonify({'message': 'User created successfully '}), 201
         
-    except SQLAlchemyError as e:
+    except Error as e:
         current_app.logger.error(f'Error creating user: {e}')
         return jsonify({'error': 'An error occurred while creating the user'}), 500
     
@@ -53,8 +54,8 @@ def login():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    cursor.execute(f"CALL getLoginDetails('{email}',NULL,NULL);")
+    login_query = sql.SQL("CALL getLoginDetails(%s, NULL, NULL);")
+    cursor.execute(login_query, (email,))
     result = cursor.fetchone()
     password_db_val = result[0]
     user_id_db_val = result[1]
