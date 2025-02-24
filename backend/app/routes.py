@@ -1,10 +1,15 @@
-from flask import Flask, request, jsonify, Blueprint,current_app
+from flask import request, jsonify, Blueprint,current_app
 from psycopg2 import sql,Error
-from flask_jwt_extended import  create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import  create_access_token
 from app.db import get_db_connection,release_db_connection
 #from sqlalchemy.exc import SQLAlchemyError
-from app import bcrypt,jwt
-
+from app import bcrypt
+# from sqlalchemy.exc import SQLAlchemyError
+from app import bcrypt
+from app.db import get_db_connection, release_db_connection
+from flask import request, jsonify, Blueprint, current_app
+from flask_jwt_extended import create_access_token
+from psycopg2 import sql, Error
 
 main = Blueprint('main', __name__)
 
@@ -70,14 +75,5 @@ def login():
     else:
         return jsonify({'error': 'Invalid email or password'}), 401
 
-# Protected Route Example
-# @main.route('/profile', methods=['GET'])
-# @jwt_required()
-# def profile():
-#     user_id = get_jwt_identity()
-#     user = User.query.get(user_id)
 
-#     if user:
-#         return jsonify({'username': user.username, 'email': user.email})
-#     return jsonify({'error': 'User not found'}), 404
 
