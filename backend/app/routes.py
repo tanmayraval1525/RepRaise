@@ -8,7 +8,6 @@ from app import bcrypt
 from app import bcrypt
 from app.db import get_db_connection, release_db_connection
 from flask import request, jsonify, Blueprint, current_app
-from flask_jwt_extended import create_access_token
 from psycopg2 import sql, Error
 
 main = Blueprint('main', __name__)
