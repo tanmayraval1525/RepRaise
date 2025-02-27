@@ -11,9 +11,19 @@ from app.db import get_db_connection, release_db_connection
 dashboard = Blueprint('dashboard', __name__)
 
 client = OpenAI(
-  organization='org-gwW4B7Vy0JFrtesNbLHNul4c',
-  project='$PROJECT_ID',
+    open_api_key=os.getenv('OPEN_API_KEY'),
 )
+
+completion = client.chat.completions.create(
+  model="gpt-4o-mini",
+  store=True,
+  messages=[
+    {"role": "user", "content": "write a haiku about ai"}
+  ]
+)
+
+print(completion.choices[0].message);
+
 # Route to get existing fitness activities
 @dashboard.route('/activities', methods=['GET'])
 # @jwt_required()
