@@ -1,6 +1,8 @@
 from flask import request, jsonify, Blueprint, current_app
 from psycopg2 import sql, Error
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from openai import OpenAI
+
+# from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.db import get_db_connection, release_db_connection
 
 # Create a Blueprint for the dashboard
@@ -8,11 +10,15 @@ from app.db import get_db_connection, release_db_connection
 
 dashboard = Blueprint('dashboard', __name__)
 
+client = OpenAI(
+  organization='org-gwW4B7Vy0JFrtesNbLHNul4c',
+  project='$PROJECT_ID',
+)
 # Route to get existing fitness activities
 @dashboard.route('/activities', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_activities():
-    user_id = get_jwt_identity()
+    # user_id = get_jwt_identity()
     
     try:
         conn = get_db_connection()
@@ -40,9 +46,9 @@ def get_activities():
 
 # Route to add a new fitness activity
 @dashboard.route('/activities', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def add_activity():
-    user_id = get_jwt_identity()
+    # user_id = get_jwt_identity()
     data = request.get_json()
     activity_name = data.get('activity_name')
     duration = data.get('duration')
@@ -54,8 +60,8 @@ def add_activity():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        insert_query = sql.SQL("INSERT INTO fitness_activities (user_id, activity_name, duration, calories_burned) VALUES (%s, %s, %s, %s);")
-        cursor.execute(insert_query, (user_id, activity_name, duration, calories_burned))
+        insert_query = sql.SQL("INSERT INTO fitness_activities (activity_name, duration, calories_burned) VALUES (%s, %s, %s);")
+        cursor.execute(insert_query, (activity_name, duration, calories_burned))
         conn.commit()
         release_db_connection(conn)
         

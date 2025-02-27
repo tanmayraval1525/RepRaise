@@ -20,4 +20,7 @@ def create_app():
     from app.routes import main
     app.register_blueprint(main)
 
+    from app.dashboard import dashboard
+    app.register_blueprint(dashboard)
+
     return app
