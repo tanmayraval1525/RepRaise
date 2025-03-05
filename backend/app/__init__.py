@@ -23,4 +23,10 @@ def create_app():
     from app.dashboard import dashboard
     app.register_blueprint(dashboard)
 
+    from app.food import food
+    app.register_blueprint(food)
+
+    from app.profile import profile
+    app.register_blueprint(profile)
+
     return app

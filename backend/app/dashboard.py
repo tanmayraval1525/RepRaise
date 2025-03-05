@@ -54,15 +54,17 @@ def get_fitness_analysis():
 
 # Route to get existing fitness activities
 @dashboard.route('/activities', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_activities():
-    user_id = get_jwt_identity()
+    user_id = 12
     
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        get_activities = sql.SQL("CALL get_recent_activities(%s);")
-        cursor.execute(get_activities, (user_id,))
+        # get_activities = sql.SQL("CALL get_recent_activities(%s, \"result_cursor\");")
+        # cursor.execute(get_activities, (user_id,))
+        cursor.execute("CALL get_recent_activities(%s, 'result_cursor');", (user_id,))
+        cursor.execute("fetch all in \"result_cursor\"")
         activities = cursor.fetchall()
         release_db_connection(conn)
         
@@ -84,12 +86,12 @@ def get_activities():
 
 # Route to add a new fitness activity
 @dashboard.route('/activities', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def add_activity():
-    user_id = get_jwt_identity()
+    user_id = 12
     data = request.get_json()
     activity_name = data.get('activityName')
-    duration = data.get('activityDuration')
+    duration = int(data.get('activityDuration'))
     
     # Validate required fields
     if not activity_name or not duration:
@@ -111,7 +113,7 @@ def add_activity():
             return jsonify({'error': 'No data found for the given activity'}), 404
         
         # Extract calories burned per hour (assuming the first result is the most relevant)
-        calories_per_hour = api_data[0].get('calories_per_hour')
+        calories_per_hour = int(api_data[0].get('calories_per_hour'))
         if not calories_per_hour:
             return jsonify({'error': 'Calories data not found in API response'}), 404
         
@@ -143,9 +145,9 @@ def add_activity():
     
     # Delete an activity
 @dashboard.route('/activities/<int:activity_id>', methods=['DELETE'])
-@jwt_required()
+# @jwt_required()
 def delete_activity(activity_id):
-    user_id = get_jwt_identity()
+    user_id = 12
     
     try:
         # Delete the activity from the database
@@ -171,12 +173,12 @@ def delete_activity(activity_id):
 
 # Update an existing activity
 @dashboard.route('/activities/<int:activity_id>', methods=['PUT'])
-@jwt_required()
+# @jwt_required()
 def update_activity(activity_id):
-    user_id = get_jwt_identity()
+    user_id = 12
     data = request.get_json()
-    activity_name = data.get('activity_name')
-    duration = data.get('duration')
+    activity_name = data.get('activityName')
+    duration = data.get('activityDuration')
     
     # Validate required fields
     if not activity_name or not duration:
@@ -198,12 +200,13 @@ def update_activity(activity_id):
             return jsonify({'error': 'No data found for the given activity'}), 404
         
         # Extract calories burned per hour (assuming the first result is the most relevant)
-        calories_per_hour = api_data[0].get('calories_per_hour')
+        calories_per_hour = int(api_data[0].get('calories_per_hour'))
         if not calories_per_hour:
             return jsonify({'error': 'Calories data not found in API response'}), 404
         
         # Calculate total calories burned based on duration
         calories_burned = (calories_per_hour * duration) / 60  # Convert duration to hours
+        # duration = str(duration)
         
         # Update the activity in the database
         conn = get_db_connection()
